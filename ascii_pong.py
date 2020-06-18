@@ -150,8 +150,8 @@ def main(screen):
 	# curses.cbreak()
 	# screen.keypad(True)  # .wrapper initializes these by default
 	# curses.noraw()
-	curses.raw()
-	curses.savetty()
+	# curses.raw()
+	# curses.savetty()
 
 	screen.nodelay(True)
 
@@ -198,9 +198,9 @@ def main(screen):
 			if right_paddle_y + PADDLE_HEIGHT > max_y:
 				right_paddle_y = max_y - PADDLE_HEIGHT - 1
 
-		# curses.napms(185)
+		curses.napms(185)
 		screen.clear()
-		curses.napms(40)
+		# curses.napms(40)
 
 		for h in range(PADDLE_HEIGHT + 1):
 
