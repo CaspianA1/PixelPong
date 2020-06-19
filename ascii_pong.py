@@ -1,46 +1,8 @@
 # ascii_pong.py
 
-import curses, time
+import curses, time, simpleaudio as sa
 from random import randint as ra, choice as ch
-
-
-
-
-"""
-def main(screen):
-	global paddle_pos
-
-	def char_key():
-		try:
-			return chr(ord(screen.getkey()))
-		except TypeError:
-			pass
-
-	def put_str(y = None, x = None, s):
-		try:
-			screen.addstr(y, x, s)
-		except curses.error:
-			pass
-
-	curses.noecho()
-	# curses.cbreak()
-	screen.keypad(True)
-
-	while char_key() != "q":
-		for h in range(PADDLE_HEIGHT):
-			screen.addstr(paddle_pos[1] + h, paddle_pos[0], "#")
-
-		screen.clear()
-
-		key = char_key()
-
-		if key == "w":
-			screen.addstr("up")
-			paddle_pos[1] += 1
-		elif key == "s":
-			screen.addstr("down")
-			paddle_pos[1] -= 1
-"""
+from title_screen import title_screen
 
 # next time:
 # colored ball - done
@@ -51,6 +13,8 @@ def main(screen):
 # make the paddle faster than the ball, or give it some acceleration - done
 # add a second paddle - done
 # increase baud rate of terminal - not sure how to do?
+# cool sounds - done
+# a title screen - done
 
 left_paddle_y = 0
 right_paddle_y = 0
@@ -65,6 +29,10 @@ ball_pos = [0, 0]
 b_going_right = True
 b_going_down = True
 
+def play_sound(audio_name):
+	wave_obj = sa.WaveObject.from_wave_file(f"Audio/{audio_name}")
+	wave_obj.play()
+
 def move_ball(screen):
 	global ball_pos
 
@@ -75,6 +43,8 @@ def move_ball(screen):
 
 	if b_going_down: ball_pos[1] += 1
 	else: ball_pos[1] -= 1
+
+	play_sound("ball_move.wav")
 
 	x, y = screen.getmaxyx()[::-1]
 
@@ -90,9 +60,11 @@ def wall_bounce(screen):
 	if ball_pos[0] == 0:
 		b_going_right = True
 		right_score += 1
+		play_sound("score_increase.wav")
 	elif ball_pos[0] == x:
 		b_going_right = False
 		left_score += 1
+		play_sound("score_increase.wav")
 	if ball_pos[1] == 0:
 		b_going_down = True
 	elif ball_pos[1] == y:
@@ -104,8 +76,10 @@ def hit_paddle(screen):
 	# left paddle x collision
 	if ball_pos[0] in (PADDLE_HEIGHT - 1, PADDLE_HEIGHT + 1):
 		# left paddle y collision
-		if ball_pos[1] in range(left_paddle_y, left_paddle_y + PADDLE_HEIGHT + 1):
+		# if ball_pos[1] in range(left_paddle_y, left_paddle_y + PADDLE_HEIGHT + 1):
+		if ball_pos[1] in range(left_paddle_y, left_paddle_y + PADDLE_HEIGHT):
 			curses.flash()
+			play_sound("paddle_blip.wav")
 			b_going_right = not b_going_right
 
 	# right paddle x collision
@@ -114,7 +88,7 @@ def hit_paddle(screen):
 		# right paddle y position
 		if ball_pos[1] in range(right_paddle_y, right_paddle_y + PADDLE_HEIGHT - 1):
 			curses.flash()
-			curses.beep()
+			play_sound("paddle_blip.wav")
 			b_going_right = not b_going_right
 
 char_ascii = lambda screen, char: screen.getch() == ord(char)
@@ -144,14 +118,8 @@ def main(screen):
 	right_paddle_y = rand_y()
 
 	b_going_right = ch((True, False))
+	b_going_right = False
 	b_going_down = ch((True, False))
-
-	# curses.noecho()
-	# curses.cbreak()
-	# screen.keypad(True)  # .wrapper initializes these by default
-	# curses.noraw()
-	# curses.raw()
-	# curses.savetty()
 
 	screen.nodelay(True)
 
@@ -198,7 +166,7 @@ def main(screen):
 			if right_paddle_y + PADDLE_HEIGHT > max_y:
 				right_paddle_y = max_y - PADDLE_HEIGHT - 1
 
-		curses.napms(185)
+		curses.napms(200)
 		screen.clear()
 		# curses.napms(40)
 
@@ -220,4 +188,5 @@ def main(screen):
 
 
 if __name__ == "__main__":
+	curses.wrapper(title_screen)
 	curses.wrapper(main)
