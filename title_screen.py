@@ -3,13 +3,10 @@
 import curses
 from copy import deepcopy
 
-char_ascii = lambda screen, char: screen.getch() == ord(char)
-
 P = r"""
  _____
 /  _  \
 |  ___/
-| |
 | |
 | |
 \_/
@@ -37,17 +34,59 @@ X = r"""
 """
 
 
-E = """ e """
-L = """ l """
-P2 = """ p """
-O = """ o """
-N = """ n """
-G = """ g """
+E = r"""
+ _______
+|  _____|
+| |_____
+|  _____|
+| |_____
+|_______|
+"""
+
+L = r"""
+ _
+| |
+| |
+| |
+| |____
+|______|
+"""
+
+O = r"""
+   _____
+  /     \
+ |  ___  |
+ | |___| |
+ |       |
+  \_____/
+"""
+
+N = r"""
+ _     _
+| \ \ | |
+|  \ \| |
+| | \ | |
+| |  \| |
+|_|   \_|
+"""
+
+G = r"""
+  ________ 
+ /  _____/ 
+/   \  ___ 
+\    \_\  \
+ \______  /
+        \/ 
+"""
+
+
+MESSAGE = (P, I, X, E, L, P, O, N, G)
 
 def log(msg):
 	open("log.txt", "a").write("\n" + str(msg))
 
-MESSAGE = (P, I, X, E, L, P2, O, N, G)
+char_ascii = lambda screen, char: screen.getch() == ord(char)
+char_special = lambda screen, spec: screen.getch() == spec
 
 def put_char(screen, x, y, s, color = None):
 	try:
@@ -60,13 +99,12 @@ def put_char(screen, x, y, s, color = None):
 		pass
 
 def title_screen(screen):
-
 	curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_GREEN)
 	screen.bkgd(" ", curses.color_pair(1))
 
 	max_y, max_x = screen.getmaxyx()
 
-	spacing = max_x // len(MESSAGE)  # may have to subtract spacing by letter width
+	spacing = max_x // len(MESSAGE) - 5 # may have to subtract spacing by letter width
 
 	# this almost works!
 	y, x = max_y // 2, 0
@@ -83,19 +121,11 @@ def title_screen(screen):
 		y = max_y // 2
 		x += spacing
 
-	"""
-	y, x = 0, 0
-	for LETTER in MESSAGE:
-		for row in LETTER.split("\n"):
-			for char in row:
-				screen.addstr(y, x, char)
-				x += 1
-			x = 0
-			y += 1
-	"""
+	screen.addstr(max_y // 2 + 10, max_x // 2 - (max_x // 8), "Press any key to start!")
+		
+	if char_special(screen, curses.KEY_ENTER):
+		return
 
-	while not char_ascii(screen, "q"):
-		pass
 		# start with displaying letters until the user hits enter
 		# then go to an option screen (names of players, winning score, colors, etc)
 
